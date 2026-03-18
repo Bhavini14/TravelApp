@@ -1,0 +1,58 @@
+﻿@model IEnumerable<TravelApp.Models.TravelPreDetails>
+
+@{
+    ViewBag.Title = "ShowPreDetails";
+}
+
+<h2>ShowPreDetails</h2>
+<td>
+    @Html.ActionLink("Back to Travel Details", "ShowDetails") |
+</td>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Currency)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Amount)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.ExchangeRate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.AmountINR)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Description)
+        </th>
+
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Currency)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Amount)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ExchangeRate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AmountINR)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Description)
+            </td>
+            <td>
+                @Html.ActionLink("Delete Pre Details", "DeletePreTravelDetails", new { id = item.Id }) |
+            </td>
+
+        </tr>
+    }
+
+</table>

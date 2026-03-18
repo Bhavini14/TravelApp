@@ -1,0 +1,233 @@
+﻿@model TravelApp.Models.TravelHeader
+@{
+    ViewBag.Title = "TravelDetails";
+
+}
+
+<h2>TravelDetails</h2>
+<style>
+    td {
+        padding: 5px;
+    }
+</style>
+@Html.ActionLink("Show Travelling Details", "ShowDetails")
+
+@using (Html.BeginForm("TravelDetails", "Travel", FormMethod.Post, new { enctype = "multipart/form-data", id = "signupform" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.Id)
+    <div class="form-horizontal">
+        <h4>TravelHeader</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="form-group">
+            @Html.LabelFor(model => model.TravelReson, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(model => model.TravelReson, Model.TravelReasonList, "----Select Reason---", new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.TravelReson, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TravellingFrom, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.TravellingFrom, new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                @Html.ValidationMessageFor(model => model.TravellingFrom, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TravellingToDate, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.TravellingToDate, new { htmlAttributes = new { @class = "form-control", type = "date" } })
+                @Html.ValidationMessageFor(model => model.TravellingToDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.ExplainationTravel, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.ExplainationTravel, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.ExplainationTravel, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.TravellingDetails, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.TravellingDetails, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.TravellingDetails, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="col-md-12 table-responsive">
+            <table class="table table-striped jsTableExhibitors">
+                <thead>
+                    <tr>
+                        <th>Currency</th>
+                        <th>Amount</th>
+                        <th>ExchangeRate</th>
+                        <th>AmountINR</th>
+                        <th>Description</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr data-index="0">
+
+                        @if (Model.TravelPreDetailsdata.Count >= 0)
+                        {
+                            for (int iCnt = 0; iCnt < Model.TravelPreDetailsdata.Count; iCnt++)
+                            {
+                                var travelpredata = Model.TravelPreDetailsdata[iCnt];
+
+                            <tr data-index="@iCnt">
+                               @* <td><label>@iCnt</label></td>*@
+                                @Html.Hidden($"TravelPreDetailsdata[{iCnt}].Id", travelpredata.Id)
+                                <td>
+                                    @Html.DropDownList($"TravelPreDetailsdata[{iCnt}].Currency", Model.CurrencyList, new { @class = "form-control"  })
+                                </td>
+                                <td>
+
+                                    @Html.TextBox($"TravelPreDetailsdata[{iCnt}].Amount", travelpredata.Amount, new { @class = "form-control", @onChange = "ConvertCurrency("+iCnt+")" })
+                                </td>
+                                <td>
+                                    @Html.TextBox($"TravelPreDetailsdata[{iCnt}].ExchangeRate", travelpredata.ExchangeRate, new { @class = "form-control" , @onChange = "ConvertCurrency(" + iCnt + ")" })
+                                </td>
+                                <td>
+                                    @Html.TextBox($"TravelPreDetailsdata[{iCnt}].AmountINR", travelpredata.AmountINR, new { @class = "form-control" , disabled = "true" })
+                                </td>
+                                <td>
+                                    @Html.TextBox($"TravelPreDetailsdata[{iCnt}].Description", travelpredata.Description, new { @class = "form-control" })
+                                </td>
+
+                                <td>
+                                    @if (iCnt == 0)
+                                    {
+                                        <button type="button" title="Add more" class="btn btn-success jsAddMoreRow"><i class="la la-plus"></i>Add</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" onclick='RemoveIsTableExhibitors(@iCnt)' title="Click to remove" class="btn btn-danger">Remove</button>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        if (Model.TravelPreDetailsdata.Count == 0)
+                        {
+                            <button type="button" title="Add more" class="btn btn-success jsAddMoreRow"><i class="la la-plus"></i>Add</button>
+                        }
+                    }
+
+
+
+                    </tbody>
+                </table>
+            </div>
+
+            <button type="button" value="Submit" class="btn btn-default" id="btnsubmit">Save</button>
+
+        </div>
+    }
+
+@section Scripts{
+    @Scripts.Render("~/bundles/jqueryval")
+    <script language="javascript">
+        var jsTablereTravel = '@Model.TravelPreDetailsdata.Count';
+        function ConvertCurrency(i) {
+            var currency = $("select[name='TravelPreDetailsdata[" + i + "].Currency']").val()
+            var Amount = $("input[name='TravelPreDetailsdata[" + i + "].Amount']").val()
+            var ExchangeRate = $("input[name='TravelPreDetailsdata[" + i + "].ExchangeRate']").val()
+            var AMountINR = Amount * ExchangeRate;
+            $("input[name='TravelPreDetailsdata[" + i + "].AmountINR']").val(AMountINR);
+        }
+        $(document).ready(function () {
+            if ('@Model.TravelReson' != null) {
+                debugger
+                $(`#TravelReson option[value='@Model.TravelReson']`).prop('selected', true);
+            }
+
+
+        $(".jsAddMoreRow").click(function () {
+            jsTablereTravel = $(".jsTableExhibitors > tbody > tr").length;
+            console.log(jsTablereTravel)
+            oHtml = [];
+            oHtml.push(`<tr data-index='${jsTablereTravel}'>`);
+            //oHtml.push("<td>");
+            //oHtml.push(`<label>${jsTablereTravel + 1}</label>`);
+            //oHtml.push("</td>");
+            oHtml.push("<td>");
+            oHtml.push(`<select class="form-control jsCurrency" id="TravelPreDetailsdata[${jsTablereTravel}].Currency" name="TravelPreDetailsdata[${jsTablereTravel}].Currency">`);
+            oHtml.push(`<option value="EURO">EURO</option>`);
+            oHtml.push(`<option value="USD">USD</option>`);
+            oHtml.push(`</select>`);
+            oHtml.push("</td>");
+            oHtml.push("<td>");
+            oHtml.push(`<input class="form-control jsAmount"  id="TravelPreDetailsdata[${jsTablereTravel}].Amount" name="TravelPreDetailsdata[${jsTablereTravel}].Amount" type="text" value="" onChange = "ConvertCurrency(${jsTablereTravel})">`)
+            oHtml.push("</td>");
+            oHtml.push("<td>");
+            oHtml.push(`<input class="form-control jsExchangeRate" id="TravelPreDetailsdata[${jsTablereTravel}].ExchangeRate" name="TravelPreDetailsdata[${jsTablereTravel}].ExchangeRate" type="text" value="" onChange = "ConvertCurrency(${jsTablereTravel})">`)
+            oHtml.push("</td>");
+            oHtml.push("<td>");
+            oHtml.push(`<input class="form-control jsAmountINR" id="TravelPreDetailsdata[${jsTablereTravel}].AmountINR" name="TravelPreDetailsdata[${jsTablereTravel}].AmountINR" type="text" value="" disabled = "true" >`)
+            oHtml.push("</td>");
+            oHtml.push("<td>");
+            oHtml.push(`<input class="form-control jsDescription" id="TravelPreDetailsdata[${jsTablereTravel}].Description" name="TravelPreDetailsdata[${jsTablereTravel}].Description" type="text" value="">`)
+            oHtml.push("</td>");
+            oHtml.push("<td>");
+            oHtml.push(`<button type="button" onclick='RemoveTablePreTravel(${jsTablereTravel})' title="Click to remove" class="btn btn-danger"><i style="color:white !important;" class="ft ft-trash-2"></i>Remove</button>`)
+            oHtml.push("</td>");
+            oHtml.push("</tr>");
+            $('.jsTableExhibitors > tbody').append(oHtml.join(" "));
+        });
+
+    });
+
+    function RemoveTablePreTravel(indexRow) {
+        $(`.jsTableExhibitors > tbody > tr[data-index='${indexRow}']`).remove();
+        $(".jsTableExhibitors > tbody > tr:not([data-index='0'])").each(function (index, elem) {
+            $(elem).closest("tr").attr('data-index', index + 1);
+            $(elem).closest("tr").find("input.jsCurrency").attr('name', `TravelPreDetailsdata[${index + 1}].Currency`);
+            $(elem).closest("tr").find("input.jsAmount").attr('name', `TravelPreDetailsdata[${index + 1}].Amount`);
+            $(elem).closest("tr").find("input.jsExchangeRate").attr('name', `TravelPreDetailsdata[${index + 1}].ExchangeRate`);
+            $(elem).closest("tr").find("input.jsAmountINR").attr('name', `TravelPreDetailsdata[${index + 1}].AmountINR`);
+            $(elem).closest("tr").find("input.jsDescription").attr('name', `TravelPreDetailsdata[${index + 1}].Description`);
+            $(elem).closest("tr").find("td:eq(3)").find("button").attr('onclick', `RemoveTableExhibitors(${index + 1})`);
+        });
+    }
+
+        $("#btnsubmit").click(function () {
+        debugger
+        var arr = [];
+        for (i = 0; i <= jsTablereTravel; i++) {
+            var cart = {};
+            cart.Id = $("input[name='TravelPreDetailsdata[" + i + "].Id']").val();
+            cart.Currency = $("select[name='TravelPreDetailsdata["+i+"].Currency']").val();
+            cart.Amount = $("input[name='TravelPreDetailsdata["+i+"].Amount']").val();
+            cart.ExchangeRate = $("input[name='TravelPreDetailsdata["+i+"].ExchangeRate']").val();
+            cart.AmountINR = $("input[name='TravelPreDetailsdata["+i+"].AmountINR']").val();
+            cart.Description = $("input[name='TravelPreDetailsdata[" + i +"].Description']").val();
+            arr.push(cart);
+        }
+        var modelData = {
+            'Id': $("#Id").val(),
+            'TravelReson': $("#TravelReson").val(),
+            'TravellingFrom': $("#TravellingFrom").val(),
+            'TravellingToDate': $("#TravellingToDate").val(),
+            'ExplainationTravel': $("#ExplainationTravel").val(),
+            'TravellingDetails': $("#TravellingDetails").val(),
+            'TravelPreDetailsdata': arr
+        };
+        $.ajax({
+            type: 'post',
+            url: '@Url.Action("UpdateTravelDetails", "Travel")',
+            data: JSON.stringify({ travelHeader: modelData }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: "json",
+            success: function (data) {
+                window.location.href='@Url.Action("ShowDetails", "Travel")';
+            }
+        });
+    });
+    </script>
+}
